@@ -7,6 +7,8 @@ public class Stu {
 	private Integer age;
 	
 	private Boolean sex;
+	
+	private static final Integer PPP_INTEGER= 15;
 
 	/**
 	 * 获取{name}
