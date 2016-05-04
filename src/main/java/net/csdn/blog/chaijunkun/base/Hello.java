@@ -13,7 +13,7 @@ public class Hello {
 	private static final Logger log = LoggerFactory.getLogger(Hello.class);
 	
 	public void say(){
-		log.info("Hello World! Mum! Dad");
+		log.info("Hello World! Mum! Dad! Aunt");
 	}
 	
 }
