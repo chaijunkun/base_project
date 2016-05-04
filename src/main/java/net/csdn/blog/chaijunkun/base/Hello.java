@@ -13,7 +13,11 @@ public class Hello {
 	private static final Logger log = LoggerFactory.getLogger(Hello.class);
 	
 	public void say(){
+<<<<<<< HEAD
 		log.info("Hello World! Mum! Dad, Welcome!");
+=======
+		log.info("Hello World! Mum! Dad! Aunt");
+>>>>>>> branch 'master' of ssh://git@github.com/chaijunkun/base_project.git
 	}
 	
 }
