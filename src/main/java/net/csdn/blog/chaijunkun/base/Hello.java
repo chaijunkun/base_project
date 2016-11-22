@@ -13,6 +13,7 @@ public class Hello {
 	private static final Logger log = LoggerFactory.getLogger(Hello.class);
 	
 	public void say(){
+		log.info("test commit");
 		log.info("Hello World! Mum! Dad, Brother!");
 	}
 	
