@@ -1,8 +1,7 @@
-package net.csdn.blog.chaijunkun.base.test;
+package com.github.chaijunkun.distribution.test;
 
+import com.github.chaijunkun.distribution.Hello;
 import org.junit.Test;
-
-import net.csdn.blog.chaijunkun.base.Hello;
 
 public class HelloTest {
 	
@@ -10,5 +9,6 @@ public class HelloTest {
 	public void sayHelloTest(){
 		new Hello().say();
 	}
+
     
 }
