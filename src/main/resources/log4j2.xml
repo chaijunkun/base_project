@@ -4,7 +4,7 @@
         <!-- APP_NAME 严禁使用 - 符号，影响日志切分-->
         <Property name="APP_NAME">chaijunkun.distribution</Property>
         <Property name="LOG_HOME">${log.path}</Property>
-        <Property name="LOG_PATTERN">%d{YYYY/MM/dd-HH:mm:ss.SSS} %thread ${APP_NAME} %level %X{unique} %logger{1} %class %method %m%n</Property>
+        <Property name="LOG_PATTERN">[%d{YYYY/MM/dd-HH:mm:ss.SSS}] [%thread] [${APP_NAME}] [%level] [%class] [%method(%line)] %m%n</Property>
         <Property name="DEBUG_LOG_FILE">chaijunkun-distribution-debug</Property>
         <Property name="DEBUG_FILE_PATTERN">${LOG_HOME}/${DEBUG_LOG_FILE}-%d{MM-dd-yyyy}-%i.log.gz</Property>
         <Property name="INFO_LOG_FILE">chaijunkun-distribution-info</Property>
@@ -58,6 +58,7 @@
     </Appenders>
     <Loggers>
         <Logger name="com.github.chaijunkun.distribution" level="${log.level}" additivity="false">
+            <AppenderRef ref="Console"/>
             <AppenderRef ref="DEBUG_LOG"/>
             <AppenderRef ref="INFO_LOG"/>
             <AppenderRef ref="ERROR_LOG"/>
