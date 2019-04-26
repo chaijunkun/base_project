@@ -1,4 +1,4 @@
-package net.csdn.blog.chaijunkun.base;
+package com.github.chaijunkun.distribution;
 
 public class Stu {
 	

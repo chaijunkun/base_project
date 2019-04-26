@@ -1,4 +1,4 @@
-package net.csdn.blog.chaijunkun.base;
+package com.github.chaijunkun.distribution;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
