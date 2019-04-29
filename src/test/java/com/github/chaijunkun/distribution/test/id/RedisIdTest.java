@@ -43,7 +43,7 @@ public class RedisIdTest extends AbstractTest {
     }
 
     @Test(threadPoolSize = 100, invocationCount = 100)
-    public void test1() {
+    public void acquireGlobalId() {
         try (Jedis resource = pool.getResource()) {
             String keyParamDate = sdf.format(Calendar.getInstance().getTime());
             String keyParamIP = this.getUniversalFlag();
