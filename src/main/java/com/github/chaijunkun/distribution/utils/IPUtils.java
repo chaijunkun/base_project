@@ -14,24 +14,22 @@ import java.util.*;
 @Slf4j
 public class IPUtils {
 
-    public static Map<String, List<String>> getLocalIP() {
-        Map<String, List<String>> ret = new HashMap<>();
+    public static Map<String, List<InetAddress>> getLocalAddress() {
+        Map<String, List<InetAddress>> ret = new HashMap<>();
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             NetworkInterface networkInterface;
             Enumeration<InetAddress> inetAddresses;
             InetAddress inetAddress;
-            String ip;
             while (networkInterfaces.hasMoreElements()) {
                 networkInterface = networkInterfaces.nextElement();
                 inetAddresses = networkInterface.getInetAddresses();
-                List<String> ipList = new ArrayList<>();
+                List<InetAddress> ipList = new ArrayList<>();
                 while (inetAddresses.hasMoreElements()) {
                     inetAddress = inetAddresses.nextElement();
                     // filter for IPV4
                     if (inetAddress != null && inetAddress instanceof Inet4Address) {
-                        ip = inetAddress.getHostAddress();
-                        ipList.add(ip);
+                        ipList.add(inetAddress);
                     }
                 }
                 if (ipList.size() > 0) {
@@ -44,10 +42,10 @@ public class IPUtils {
         return ret;
     }
 
-    public static String getDefaultLocalIPByName(String name) {
-        Map<String, List<String>> localIP = getLocalIP();
+    public static InetAddress getDefaultLocalAddressByName(String name) {
+        Map<String, List<InetAddress>> localIP = getLocalAddress();
         if (StringUtils.isBlank(name)) {
-            List<String> ipList = localIP.get("eth0");
+            List<InetAddress> ipList = localIP.get("eth0");
             if (CollectionUtils.isNotEmpty(ipList)) {
                 return ipList.get(0);
             } else {
@@ -60,7 +58,7 @@ public class IPUtils {
 
             }
         } else {
-            List<String> ipList = localIP.get(name);
+            List<InetAddress> ipList = localIP.get(name);
             if (ipList.size() > 0) {
                 return ipList.get(0);
             } else {
@@ -69,8 +67,8 @@ public class IPUtils {
         }
     }
 
-    public static String getDefaultLocalIP() {
-        return getDefaultLocalIPByName(null);
+    public static InetAddress getDefaultLocalAddress() {
+        return getDefaultLocalAddressByName(null);
     }
 
 }
