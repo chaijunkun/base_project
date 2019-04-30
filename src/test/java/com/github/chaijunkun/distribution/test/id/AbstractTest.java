@@ -2,11 +2,20 @@ package com.github.chaijunkun.distribution.test.id;
 
 import com.github.chaijunkun.distribution.utils.IPUtils;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 
+@Slf4j
 public abstract class AbstractTest {
+
+    protected static final String BIZ_ID = "order_id";
+
+    protected static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 
     @Getter
     private String universalFlag = "";
@@ -30,4 +39,15 @@ public abstract class AbstractTest {
     AbstractTest() {
         this.setUnversalFlag();
     }
+
+    @BeforeTest
+    public void before() {
+        log.info("start to run");
+    }
+
+    @AfterTest
+    public void after() {
+        log.info("stop");
+    }
+
 }
