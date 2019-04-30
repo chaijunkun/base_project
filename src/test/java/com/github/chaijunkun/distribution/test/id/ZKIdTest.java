@@ -13,6 +13,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.concurrent.CountDownLatch;
 
 
 @Slf4j
@@ -28,6 +29,11 @@ class Client implements Watcher, Closeable {
 
     private ZooKeeper zk;
 
+    /**
+     * semaphore for waiting connection established
+     */
+    private CountDownLatch connectedSemaphore = new CountDownLatch(1);
+
     Client(String host, int port, int timeout) {
         this.host = host;
         this.port = port;
@@ -37,6 +43,11 @@ class Client implements Watcher, Closeable {
     public synchronized void connect() throws IOException {
         if (null == this.zk) {
             this.zk = new ZooKeeper(String.format("%s:%d", this.host, this.port), this.timeout, this);
+            try {
+                connectedSemaphore.await();
+            } catch (InterruptedException e) {
+                throw new IOException("cannot wait until connected", e);
+            }
         }
     }
 
@@ -46,7 +57,7 @@ class Client implements Watcher, Closeable {
             try {
                 this.zk.close();
                 this.zk = null;
-            }catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 log.warn("fail to close this client", e);
             }
         }
@@ -54,37 +65,49 @@ class Client implements Watcher, Closeable {
 
     @Override
     public void process(WatchedEvent watchedEvent) {
-        log.info("process info: {}", watchedEvent);
+        //获取事件的状态
+        Event.KeeperState keeperState = watchedEvent.getState();
+        Event.EventType eventType = watchedEvent.getType();
+        //如果是建立连接
+        if (Event.KeeperState.SyncConnected == keeperState) {
+            if (Event.EventType.None == eventType) {
+                //如果建立连接成功，则发送信号量，让后续阻塞程序向下执行
+                connectedSemaphore.countDown();
+                log.info("zk connected");
+            }
+        }
     }
 
     /**
      * this operation should by executed by a quartz task.
      * for performance reason, check path whether exists is not essential for each acquire
      * for each acquire, it is considered that the path exists all the time.
+     *
      * @param path
      * @throws IOException
      */
     public void createPath(String path) throws IOException {
-        try {
-            String[] pathNodes = StringUtils.split(path, "/");
-            if (ArrayUtils.isNotEmpty(pathNodes)) {
-                for (int i = 0; i < pathNodes.length; i++) {
-                    StringBuilder sb = new StringBuilder();
-                    for (int j = 0; j <= i; j++) {
-                        sb.append("/").append(pathNodes[j]);
-                    }
-                    String hierachyPath = sb.toString();
-                    log.info("create node: {}", hierachyPath);
+        String[] pathNodes = StringUtils.split(path, "/");
+        if (ArrayUtils.isNotEmpty(pathNodes)) {
+            for (int i = 0; i < pathNodes.length; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j <= i; j++) {
+                    sb.append("/").append(pathNodes[j]);
+                }
+                String hierachyPath = sb.toString();
+                log.info("create znode: {}", hierachyPath);
+                try {
                     this.zk.create(hierachyPath, blankData, ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+                } catch (KeeperException e) {
+                    if (!KeeperException.Code.NODEEXISTS.equals(e.code())) {
+                        throw new IOException(e);
+                    }
+                } catch (InterruptedException e) {
+                    throw new IOException(e);
                 }
             }
-        } catch (KeeperException e) {
-            if (!KeeperException.Code.NODEEXISTS.equals(e.code())) {
-                throw new IOException(e);
-            }
-        } catch (InterruptedException e) {
-            throw new IOException(e);
         }
+
     }
 
     public Integer incrVersion(String path) throws KeeperException, InterruptedException {
@@ -96,6 +119,7 @@ class Client implements Watcher, Closeable {
 
 /**
  * Zookeeper生成全局唯一id测试用例
+ *
  * @author chaijunkun
  */
 @Slf4j
@@ -118,6 +142,7 @@ public class ZKIdTest extends AbstractTest {
 
     /**
      * you should create node /global first, and then /global/[BIZ_ID]...
+     *
      * @param universalFlag
      * @param keyParamDate
      * @return
@@ -140,7 +165,6 @@ public class ZKIdTest extends AbstractTest {
         String path = this.getPath(this.getUniversalFlag(), sdf.format(Calendar.getInstance().getTime()));
         this.client.createPath(path);
     }
-
 
 
     @Test(threadPoolSize = 100, invocationCount = 100)
