@@ -65,13 +65,14 @@ class Client implements Watcher, Closeable {
 
     @Override
     public void process(WatchedEvent watchedEvent) {
-        //获取事件的状态
+        //get event state
         Event.KeeperState keeperState = watchedEvent.getState();
         Event.EventType eventType = watchedEvent.getType();
-        //如果是建立连接
+        //if event state is SyncConnected
         if (Event.KeeperState.SyncConnected == keeperState) {
+            // and event type is None
             if (Event.EventType.None == eventType) {
-                //如果建立连接成功，则发送信号量，让后续阻塞程序向下执行
+                // countdown semaphore, then the previous await statement released
                 connectedSemaphore.countDown();
                 log.info("zk connected");
             }
